@@ -240,3 +240,4 @@ fabric.properties
 # Built Visual Studio Code Extensions
 *.vsix
 
+/server_base.db3
