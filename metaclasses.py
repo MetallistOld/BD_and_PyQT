@@ -3,7 +3,7 @@ import dis
 
 # Метакласс для проверки соответствия сервера:
 class ServerMaker(type):
-    def __init__(self, clsname, bases, clsdict):
+    def __init__(cls, clsname, bases, clsdict):
         # clsname - экземпляр метакласса - Server
         # bases - кортеж базовых классов - ()
         # clsdict - словарь атрибутов и методов экземпляра метакласса
@@ -37,10 +37,6 @@ class ServerMaker(type):
             else:
                 # Раз функция разбираем код, получая используемые методы и атрибуты.
                 for i in ret:
-                    print(i)
-                    # i - Instruction(opname='LOAD_GLOBAL', opcode=116, arg=9, argval='send_message',
-                    # argrepr='send_message', offset=308, starts_line=201, is_jump_target=False)
-                    # opname - имя для операции
                     if i.opname == 'LOAD_GLOBAL':
                         if i.argval not in methods:
                             # заполняем список методами, использующимися в функциях класса
@@ -49,7 +45,6 @@ class ServerMaker(type):
                         if i.argval not in attrs:
                             # заполняем список атрибутами, использующимися в функциях класса
                             attrs.append(i.argval)
-        print(methods)
         # Если обнаружено использование недопустимого метода connect, бросаем исключение:
         if 'connect' in methods:
             raise TypeError('Использование метода connect недопустимо в серверном классе')
@@ -62,7 +57,7 @@ class ServerMaker(type):
 
 # Метакласс для проверки корректности клиентов:
 class ClientMaker(type):
-    def __init__(self, clsname, bases, clsdict):
+    def __init__(cls, clsname, bases, clsdict):
         # Список методов, которые используются в функциях класса:
         methods = []
         for func in clsdict:
