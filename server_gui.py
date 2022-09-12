@@ -8,9 +8,9 @@ import os
 
 # GUI - Создание таблицы QModel, для отображения в окне программы.
 def gui_create_model(database):
-    list_users = database.active_users_list()  # список активных юзеров
-    list_ = QStandardItemModel()  # Это начинка можно сказать разметка QTableView
-    list_.setHorizontalHeaderLabels(['Имя Клиента', 'IP Адрес', 'Порт', 'Время подключения'])
+    list_users = database.active_users_list()
+    list = QStandardItemModel()
+    list.setHorizontalHeaderLabels(['Имя Клиента', 'IP Адрес', 'Порт', 'Время подключения'])
     for row in list_users:
         user, ip, port, time = row
         user = QStandardItem(user)  # создаем элемент
@@ -22,8 +22,8 @@ def gui_create_model(database):
         # Уберём миллисекунды из строки времени, т.к. такая точность не требуется.
         time = QStandardItem(str(time.replace(microsecond=0)))
         time.setEditable(False)
-        list_.appendRow([user, ip, port, time])  # добавляем строку
-    return list_
+        list.appendRow([user, ip, port, time])
+    return list
 
 
 # GUI - Функция реализующая заполнение таблицы историей сообщений.
@@ -159,6 +159,7 @@ class ConfigWindow(QDialog):
             dialog = QFileDialog(self)
             path = dialog.getExistingDirectory()
             path = path.replace('/', '\\')
+            self.db_path.clear()
             self.db_path.insert(path)
 
         self.db_path_select.clicked.connect(open_file_dialog)
@@ -221,5 +222,3 @@ if __name__ == '__main__':
     ex.active_clients_table.setModel(test_list)
     ex.active_clients_table.resizeColumnsToContents()
     app.exec_()
-    print('END')
-
