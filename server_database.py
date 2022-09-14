@@ -49,9 +49,8 @@ class ServerStorage:
             self.sent = 0
             self.accepted = 0
 
-    def __init__(self, path):
-        # Создаём движок базы данных Традиционный подох
-        print(path)
+    def __init__(self , path):
+        # Создаём движок базы данных
         self.database_engine = create_engine(f'sqlite:///{path}', echo=False, pool_recycle=7200,
                                              connect_args={'check_same_thread': False})
 
@@ -203,11 +202,11 @@ class ServerStorage:
             return
 
         # Удаляем требуемое
-        print(self.session.query(self.UsersContacts).filter(
+        self.session.query(self.UsersContacts).filter(
             self.UsersContacts.user == user.id,
             self.UsersContacts.contact == contact.id
-        ).delete())
-        self.session.commit()  # add_new
+        ).delete()
+        self.session.commit()
 
     # Функция возвращает список известных пользователей со временем последнего входа.
     def users_list(self):

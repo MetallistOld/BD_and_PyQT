@@ -242,3 +242,10 @@ fabric.properties
 
 /*.db3
 
+/client/client_Alex.db3
+/client/client_Max.db3
+/client/client_Test0.db3
+/client/client_Test1.db3
+/client/client_test2.db3
+/client/client_test3.db3
+/client/client_User.db3
