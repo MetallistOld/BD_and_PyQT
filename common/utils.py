@@ -5,6 +5,7 @@ import json
 from common.variables import *
 from common.errors import IncorrectDataRecivedError, NonDictInputError
 from common.decos import log
+
 sys.path.append('../')
 
 
@@ -12,9 +13,9 @@ sys.path.append('../')
 def get_message(client):
     """
     Утилита приёма и декодирования сообщения принимает байты выдаёт словарь,
-    если приняточто-то другое отдаёт ошибку значения
-    :param client:
-    :return:
+    если принято что-то другое отдаёт ошибку значения
+    :param client: сокет для передачи данных.
+    :return: словарь - сообщение.
     """
     encoded_response = client.recv(MAX_PACKAGE_LENGTH)
     json_response = encoded_response.decode(ENCODING)
@@ -25,15 +26,14 @@ def get_message(client):
         raise TypeError
 
 
-
 @log
 def send_message(sock, message):
     """
     Утилита кодирования и отправки сообщения
     принимает словарь и отправляет его
-    :param sock:
-    :param message:
-    :return:
+    :param sock: сокет для передачи
+    :param message: словарь для передачи
+    :return: ничего не возвращает
     """
     js_message = json.dumps(message)
     encoded_message = js_message.encode(ENCODING)

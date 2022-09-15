@@ -21,7 +21,7 @@ class TestSocket:
 
     def send(self, message_to_send):
         """
-        Тестовая функция отправки, корретно  кодирует сообщение,
+        Тестовая функция отправки, корректно  кодирует сообщение,
         так-же сохраняет что должно было отправлено в сокет.
         message_to_send - то, что отправляем в сокет
         :param message_to_send:
@@ -70,8 +70,8 @@ class Tests(unittest.TestCase):
         test_socket = TestSocket(self.test_dict_send)
         # вызов тестируемой функции, результаты будут сохранены в тестовом сокете
         send_message(test_socket, self.test_dict_send)
-        # проверка корретности кодирования словаря.
-        # сравниваем результат довренного кодирования и результат от тестируемой функции
+        # проверка корректности кодирования словаря.
+        # сравниваем результат доваренного кодирования и результат от тестируемой функции
         self.assertEqual(test_socket.encoded_message, test_socket.receved_message)
         # дополнительно, проверим генерацию исключения, при не словаре на входе.
         self.assertRaises(TypeError, send_message, test_socket, 1111)

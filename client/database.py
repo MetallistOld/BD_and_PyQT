@@ -9,14 +9,23 @@ import datetime
 
 # Класс - база данных сервера.
 class ClientDatabase:
-    # Класс - отображение таблицы известных пользователей.
+    '''
+    Класс - оболочка для работы с базой данных клиента.
+    Использует SQLite базу данных, реализован с помощью
+    SQLAlchemy ORM и используется классический подход.
+    '''
     class KnownUsers:
+        '''
+        Класс - отображение для таблицы всех пользователей.
+        '''
         def __init__(self, user):
             self.id = None
             self.username = user
 
-    # Класс - отображение таблицы истории сообщений
-    class MessageHistory:
+    class MessageStat:
+        '''
+        Класс - отображение для таблицы статистики переданных сообщений.
+        '''
         def __init__(self, contact, direction, message):
             self.id = None
             self.contact = contact
@@ -69,7 +78,7 @@ class ClientDatabase:
 
         # Создаём отображения
         mapper(self.KnownUsers, users)
-        mapper(self.MessageHistory, history)
+        mapper(self.MessageStat, history)
         mapper(self.Contacts, contacts)
 
         # Создаём сессию
@@ -87,7 +96,10 @@ class ClientDatabase:
             self.session.add(contact_row)
             self.session.commit()
 
-    # Функция удаления контакта
+    def contacts_clear(self):
+        '''Метод очищающий таблицу со списком контактов.'''
+        self.session.query(self.Contacts).delete()
+
     def del_contact(self, contact):
         self.session.query(self.Contacts).filter_by(name=contact).delete()
 
@@ -102,7 +114,8 @@ class ClientDatabase:
 
     # Функция сохраняющяя сообщения
     def save_message(self, contact, direction, message):
-        message_row = self.MessageHistory(contact, direction, message)
+        '''Метод сохраняющий сообщение в базе данных.'''
+        message_row = self.MessageStat(contact, direction, message)
         self.session.add(message_row)
         self.session.commit()
 
@@ -130,7 +143,7 @@ class ClientDatabase:
 
     # Функция возвращающая историю переписки
     def get_history(self, contact):
-        query = self.session.query(self.MessageHistory).filter_by(contact=contact)
+        query = self.session.query(self.MessageStat).filter_by(contact=contact)
         return [(history_row.contact, history_row.direction, history_row.message, history_row.date)
                 for history_row in query.all()]
 
