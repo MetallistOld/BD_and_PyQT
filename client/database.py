@@ -1,31 +1,35 @@
+import datetime
+from common.variables import *
 from sqlalchemy import create_engine, Table, Column, Integer, String, Text, MetaData, DateTime
 from sqlalchemy.orm import mapper, sessionmaker
 import os
 import sys
+
 sys.path.append('../')
-from common.variables import *
-import datetime
 
 
 # Класс - база данных сервера.
 class ClientDatabase:
-    '''
+    """
     Класс - оболочка для работы с базой данных клиента.
     Использует SQLite базу данных, реализован с помощью
     SQLAlchemy ORM и используется классический подход.
-    '''
+    """
+
     class KnownUsers:
-        '''
+        """
         Класс - отображение для таблицы всех пользователей.
-        '''
+        """
+
         def __init__(self, user):
             self.id = None
             self.username = user
 
     class MessageStat:
-        '''
+        """
         Класс - отображение для таблицы статистики переданных сообщений.
-        '''
+        """
+
         def __init__(self, contact, direction, message):
             self.id = None
             self.contact = contact
@@ -46,8 +50,12 @@ class ClientDatabase:
         # иначе sqlite3.ProgrammingError
         path = os.path.dirname(os.path.realpath(__file__))
         filename = f'client_{name}.db3'
-        self.database_engine = create_engine(f'sqlite:///{os.path.join(path, filename)}', echo=False, pool_recycle=7200,
-                                             connect_args={'check_same_thread': False})
+        self.database_engine = create_engine(
+            f'sqlite:///{os.path.join(path, filename)}',
+            echo=False,
+            pool_recycle=7200,
+            connect_args={
+                'check_same_thread': False})
 
         # Создаём объект MetaData
         self.metadata = MetaData()
@@ -85,19 +93,22 @@ class ClientDatabase:
         Session = sessionmaker(bind=self.database_engine)
         self.session = Session()
 
-        # Необходимо очистить таблицу контактов, т.к. при запуске они подгружаются с сервера.
+        # Необходимо очистить таблицу контактов, т.к. при запуске они
+        # подгружаются с сервера.
         self.session.query(self.Contacts).delete()
         self.session.commit()
 
     # Функция добавления контактов
     def add_contact(self, contact):
-        if not self.session.query(self.Contacts).filter_by(name=contact).count():
+        if not self.session.query(
+                self.Contacts).filter_by(
+                name=contact).count():
             contact_row = self.Contacts(contact)
             self.session.add(contact_row)
             self.session.commit()
 
     def contacts_clear(self):
-        '''Метод очищающий таблицу со списком контактов.'''
+        """Метод очищающий таблицу со списком контактов."""
         self.session.query(self.Contacts).delete()
 
     def del_contact(self, contact):
@@ -112,29 +123,33 @@ class ClientDatabase:
             self.session.add(user_row)
         self.session.commit()
 
-    # Функция сохраняющяя сообщения
+    # Функция сохраняющая сообщения
     def save_message(self, contact, direction, message):
-        '''Метод сохраняющий сообщение в базе данных.'''
+        """Метод сохраняющий сообщение в базе данных."""
         message_row = self.MessageStat(contact, direction, message)
         self.session.add(message_row)
         self.session.commit()
 
-    # Функция возвращающяя контакты
+    # Функция возвращающая контакты
     def get_contacts(self):
-        return [contact[0] for contact in self.session.query(self.Contacts.name).all()]
+        return [contact[0]
+                for contact in self.session.query(self.Contacts.name).all()]
 
-    # Функция возвращающяя список известных пользователей
+    # Функция возвращающая список известных пользователей
     def get_users(self):
-        return [user[0] for user in self.session.query(self.KnownUsers.username).all()]
+        return [user[0]
+                for user in self.session.query(self.KnownUsers.username).all()]
 
-    # Функция проверяющяя наличие пользователя в известных
+    # Функция проверяющая наличие пользователя в известных
     def check_user(self, user):
-        if self.session.query(self.KnownUsers).filter_by(username=user).count():
+        if self.session.query(
+                self.KnownUsers).filter_by(
+                username=user).count():
             return True
         else:
             return False
 
-    # Функция проверяющяя наличие пользователя контактах
+    # Функция проверяющая наличие пользователя контактах
     def check_contact(self, contact):
         if self.session.query(self.Contacts).filter_by(name=contact).count():
             return True
@@ -144,23 +159,25 @@ class ClientDatabase:
     # Функция возвращающая историю переписки
     def get_history(self, contact):
         query = self.session.query(self.MessageStat).filter_by(contact=contact)
-        return [(history_row.contact, history_row.direction, history_row.message, history_row.date)
-                for history_row in query.all()]
+        return [(history_row.contact,
+                 history_row.direction,
+                 history_row.message,
+                 history_row.date) for history_row in query.all()]
 
 
 # отладка
 if __name__ == '__main__':
     test_db = ClientDatabase('test1')
-    #for i in ['test3', 'test4', 'test5']:
+    # for i in ['test3', 'test4', 'test5']:
     #    test_db.add_contact(i)
-    #test_db.add_contact('test4')
-    #test_db.add_users(['test1', 'test2', 'test3', 'test4', 'test5'])
-    #test_db.save_message('test2', 'in', f'Привет! я тестовое сообщение от {datetime.datetime.now()}!')
-    #test_db.save_message('test2', 'out', f'Привет! я другое тестовое сообщение от {datetime.datetime.now()}!')
-    #print(test_db.get_contacts())
-    #print(test_db.get_users())
-    #print(test_db.check_user('test1'))
-    #print(test_db.check_user('test10'))
-    print(sorted(test_db.get_history('test2') , key=lambda item: item[3]))
-    #test_db.del_contact('test4')
-    #print(test_db.get_contacts())
+    # test_db.add_contact('test4')
+    # test_db.add_users(['test1', 'test2', 'test3', 'test4', 'test5'])
+    # test_db.save_message('test2', 'in', f'Привет! я тестовое сообщение от {datetime.datetime.now()}!')
+    # test_db.save_message('test2', 'out', f'Привет! я другое тестовое сообщение от {datetime.datetime.now()}!')
+    # print(test_db.get_contacts())
+    # print(test_db.get_users())
+    # print(test_db.check_user('test1'))
+    # print(test_db.check_user('test10'))
+    print(sorted(test_db.get_history('test2'), key=lambda item: item[3]))
+    # test_db.del_contact('test4')
+    # print(test_db.get_contacts())

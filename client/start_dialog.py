@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QApplication, QLabel , qApp
+from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QApplication, QLabel, qApp
 from PyQt5.QtCore import QEvent
 
 
@@ -39,7 +39,8 @@ class UserNameDialog(QDialog):
 
         self.show()
 
-    # Обработчик кнопки ОК, если поле вводе не пустое, ставим флаг и завершаем приложение.
+    # Обработчик кнопки ОК, если поле вводе не пустое, ставим флаг и завершаем
+    # приложение.
     def click(self):
         """Метод обработчик кнопки ОК."""
         if self.client_name.text() and self.client_passwd.text():
