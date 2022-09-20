@@ -13,7 +13,7 @@ from common.decos import log
 from client.database import ClientDatabase
 from client.transport import ClientTransport
 from client.main_window import ClientMainWindow
-from client.start_dialog import UserNameDialog # НОВЫЙ ПОКАЗАТЬ
+from client.start_dialog import UserNameDialog  # НОВЫЙ ПОКАЗАТЬ
 
 # Инициализация клиентского логера
 LOGGER = logging.getLogger('client')
@@ -56,11 +56,13 @@ if __name__ == '__main__':
     start_dialog = UserNameDialog()
     if not client_name or not client_passwd:
         client_app.exec_()
-        # Если пользователь ввёл имя и нажал ОК, то сохраняем ведённое и удаляем объект, иначе выходим
+        # Если пользователь ввёл имя и нажал ОК, то сохраняем ведённое и
+        # удаляем объект, иначе выходим
         if start_dialog.ok_pressed:
             client_name = start_dialog.client_name.text()
             client_passwd = start_dialog.client_passwd.text()
-            LOGGER.debug(f'Using USERNAME = {client_name}, PASSWD = {client_passwd}.')
+            LOGGER.debug(
+                f'Using USERNAME = {client_name}, PASSWD = {client_passwd}.')
         else:
             exit(0)
 
@@ -79,14 +81,20 @@ if __name__ == '__main__':
         with open(key_file, 'rb') as key:
             keys = RSA.import_key(key.read())
 
-    #!!!keys.publickey().export_key()
+    keys.publickey().export_key()
     LOGGER.debug("Keys successfully loaded.")
     # Создаём объект базы данных
     database = ClientDatabase(client_name)
 
     # Создаём объект - транспорт и запускаем транспортный поток
     try:
-        transport = ClientTransport(server_port, server_address, database, client_name, client_passwd, keys)
+        transport = ClientTransport(
+            server_port,
+            server_address,
+            database,
+            client_name,
+            client_passwd,
+            keys)
         LOGGER.debug("Transport ready.")
     except ServerError as error:
         message = QMessageBox()

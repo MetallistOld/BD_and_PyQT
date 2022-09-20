@@ -85,8 +85,7 @@ class MessageProcessor(threading.Thread):
                     try:
                         self.process_client_message(
                             get_message(client_with_message), client_with_message)
-                    except (OSError, json.JSONDecodeError, TypeError) as err:
-                        logger.debug(f'Getting data from client exception.', exc_info=err)
+                    except (OSError, json.JSONDecodeError, TypeError):
                         self.remove_client(client_with_message)
 
     def remove_client(self, client):
@@ -240,12 +239,10 @@ class MessageProcessor(threading.Thread):
     def autorize_user(self, message, sock):
         """Метод реализующий авторизацию пользователей."""
         # Если имя пользователя уже занято то возвращаем 400
-        logger.debug(f'Start auth process for {message[USER]}')
         if message[USER][ACCOUNT_NAME] in self.names.keys():
             response = RESPONSE_400
             response[ERROR] = 'Имя пользователя уже занято.'
             try:
-                logger.debug(f'Username busy, sending {response}')
                 send_message(sock, response)
             except OSError:
                 logger.debug('OS Error')
@@ -257,14 +254,12 @@ class MessageProcessor(threading.Thread):
             response = RESPONSE_400
             response[ERROR] = 'Пользователь не зарегистрирован.'
             try:
-                logger.debug(f'Unknown username, sending {response}')
                 send_message(sock, response)
             except OSError:
                 pass
             self.clients.remove(sock)
             sock.close()
         else:
-            logger.debug('Correct username, starting passwd check.')
             # Иначе отвечаем 511 и проводим процедуру авторизации
             # Словарь - заготовка
             message_auth = RESPONSE_511
@@ -276,13 +271,11 @@ class MessageProcessor(threading.Thread):
             # серверную версию ключа
             hash = hmac.new(self.database.get_hash(message[USER][ACCOUNT_NAME]), random_str, 'MD5')
             digest = hash.digest()
-            logger.debug(f'Auth message = {message_auth}')
             try:
                 # Обмен с клиентом
                 send_message(sock, message_auth)
                 ans = get_message(sock)
-            except OSError as err:
-                logger.debug('Error in auth, data:', exc_info=err)
+            except OSError:
                 sock.close()
                 return
             client_digest = binascii.a2b_base64(ans[DATA])

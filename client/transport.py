@@ -1,3 +1,6 @@
+from common.errors import ServerError
+from common.variables import *
+from common.utils import *
 import socket
 import sys
 import time
@@ -10,9 +13,6 @@ import binascii
 from PyQt5.QtCore import pyqtSignal, QObject
 
 sys.path.append('../')
-from common.utils import *
-from common.variables import *
-from common.errors import ServerError
 
 # Логер и объект блокировки для работы с сокетом.
 logger = logging.getLogger('client')
@@ -51,7 +51,8 @@ class ClientTransport(threading.Thread, QObject):
             if err.errno:
                 logger.critical(f'Потеряно соединение с сервером.')
                 raise ServerError('Потеряно соединение с сервером!')
-            logger.error('Timeout соединения при обновлении списков пользователей.')
+            logger.error(
+                'Timeout соединения при обновлении списков пользователей.')
         except json.JSONDecodeError:
             logger.critical(f'Потеряно соединение с сервером.')
             raise ServerError('Потеряно соединение с сервером!')
@@ -66,7 +67,8 @@ class ClientTransport(threading.Thread, QObject):
         # Таймаут необходим для освобождения сокета.
         self.transport.settimeout(5)
 
-        # Соединяемся, 5 попыток соединения, флаг успеха ставим в True если удалось
+        # Соединяемся, 5 попыток соединения, флаг успеха ставим в True если
+        # удалось
         connected = False
         for i in range(5):
             logger.info(f'Попытка подключения №{i + 1}')
@@ -94,8 +96,6 @@ class ClientTransport(threading.Thread, QObject):
         passwd_hash = hashlib.pbkdf2_hmac('sha512', passwd_bytes, salt, 10000)
         passwd_hash_string = binascii.hexlify(passwd_hash)
 
-        logger.debug(f'Passwd hash ready: {passwd_hash_string}')
-
         # Получаем публичный ключ и декодируем его из байтов
         pubkey = self.keys.publickey().export_key().decode('ascii')
 
@@ -109,12 +109,10 @@ class ClientTransport(threading.Thread, QObject):
                     PUBLIC_KEY: pubkey
                 }
             }
-            logger.debug(f"Presence message = {presense}")
             # Отправляем серверу приветственное сообщение.
             try:
                 send_message(self.transport, presense)
                 ans = get_message(self.transport)
-                logger.debug(f'Server response = {ans}.')
                 # Если сервер вернул ошибку, бросаем исключение.
                 if RESPONSE in ans:
                     if ans[RESPONSE] == 400:
@@ -123,7 +121,8 @@ class ClientTransport(threading.Thread, QObject):
                         # Если всё нормально, то продолжаем процедуру
                         # авторизации.
                         ans_data = ans[DATA]
-                        hash = hmac.new(passwd_hash_string, ans_data.encode('utf-8'), 'MD5')
+                        hash = hmac.new(
+                            passwd_hash_string, ans_data.encode('utf-8'), 'MD5')
                         digest = hash.digest()
                         my_ans = RESPONSE_511
                         my_ans[DATA] = binascii.b2a_base64(
@@ -134,7 +133,8 @@ class ClientTransport(threading.Thread, QObject):
                 logger.debug(f'Connection error.', exc_info=err)
                 raise ServerError('Сбой соединения в процессе авторизации.')
 
-    # Функция обрабатывающая сообщения от сервера. Ничего не возвращает. Генерирует исключение при ошибке.
+    # Функция обрабатывающая сообщения от сервера. Ничего не возвращает.
+    # Генерирует исключение при ошибке.
     def process_server_ans(self, message):
         logger.debug(f'Разбор сообщения от сервера: {message}')
 
@@ -149,9 +149,13 @@ class ClientTransport(threading.Thread, QObject):
                 self.contacts_list_update()
                 self.message_205.emit()
             else:
-                logger.debug(f'Принят неизвестный код подтверждения {message[RESPONSE]}')
+                logger.debug(
+                    f'Принят неизвестный код подтверждения {message[RESPONSE]}')
 
-        # Если это сообщение от пользователя добавляем в базу, даём сигнал о новом сообщении
+        # Если это сообщение от пользователя
+        # добавляем в базу, даём сигнал о
+        # новом сообщении
+
         elif ACTION in message and message[ACTION] == MESSAGE and SENDER in message and DESTINATION in message \
                 and MESSAGE_TEXT in message and message[DESTINATION] == self.username:
             logger.debug(
@@ -273,7 +277,8 @@ class ClientTransport(threading.Thread, QObject):
         logger.debug('Запущен процесс - приёмник сообщений с сервера.')
         while self.running:
             # Отдыхаем секунду и снова пробуем захватить сокет.
-            # если не сделать тут задержку, то отправка может достаточно долго ждать освобождения сокета.
+            # если не сделать тут задержку, то отправка может достаточно долго
+            # ждать освобождения сокета.
             time.sleep(1)
             message = None
             with socket_lock:
